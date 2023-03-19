@@ -23,7 +23,6 @@ data "aws_iam_policy_document" "karpenter_controller_assume_role_policy" {
       type = "Federated"
     }
   }
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
 }
 
 data "aws_iam_policy_document" "karpenter" {
@@ -59,7 +58,6 @@ data "aws_iam_policy_document" "karpenter" {
     actions   = ["sqs:DeleteMessage", "sqs:GetQueueUrl", "sqs:GetQueueAttributes", "sqs:ReceiveMessage"]
     effect    = "Allow"
   }
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
 }
 
 resource "aws_iam_role" "karpenter_controller" {
@@ -71,16 +69,20 @@ resource "aws_iam_role" "karpenter_controller" {
     name   = "karpenter"
   }
 
-  depends_on = [ aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private , data.aws_iam_policy_document.karpenter_controller_assume_role_policy , data.aws_iam_policy_document.karpenter]
+  depends_on = [data.aws_iam_policy_document.karpenter_controller_assume_role_policy , data.aws_iam_policy_document.karpenter]
 }
 
 ## Karpenter Instance Profile
 
 
+data "aws_iam_role" "NodeGroupRole" {
+  name = "EKSNodeGroupRole_v2"
+}
+
+
 resource "aws_iam_instance_profile" "karpenter" {
   name = "karpenter-instance-profile"
   role = data.aws_iam_role.NodeGroupRole.name
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
 }
 
 #### Enable Interruption Handling ####
@@ -89,8 +91,7 @@ resource "aws_iam_instance_profile" "karpenter" {
 
 resource "aws_sqs_queue" "karpenter" {
   message_retention_seconds = 300
-  name   = "${var.cluster_name}-karpenter-sqs-queue"
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
+  name                      = "${var.cluster_name}-karpenter-sqs-queue"
 }
 
 
@@ -99,11 +100,9 @@ resource "aws_sqs_queue" "karpenter" {
 resource "aws_sqs_queue_policy" "karpenter" {
   policy    = data.aws_iam_policy_document.node_termination_queue.json
   queue_url = aws_sqs_queue.karpenter.url
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
 }
 
 data "aws_iam_policy_document" "node_termination_queue" {
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
   statement {
     resources = [aws_sqs_queue.karpenter.arn]
     sid       = "SQSWrite"
@@ -196,6 +195,30 @@ resource "helm_release" "karpenter" {
   chart               = "karpenter"
   version    = "v0.27.0"  
   values = [data.template_file.karpenter.rendered]
+  # set {
+  #   name  = "serviceAccount.annotations.eks\.amazonaws\.com/role-arn"
+  #   value = "${aws_iam_role.karpenter_controller.arn}"
+  # }
+
+  # set {
+  #   name  = "settings.aws.clusterName"
+  #   value = data.aws_eks_cluster.cluster.id
+  # }
+
+  # set {
+  #   name  = "settings.aws.clusterEndpoint"
+  #   value = data.aws_eks_cluster.cluster.endpoint
+  # }
+
+  # set {
+  #   name  = "settings.aws.defaultInstanceProfile"
+  #   value = aws_iam_instance_profile.karpenter.name
+  # }
+
+  # set {
+  #   name  = "settings.aws.interruptionQueueName"
+  #   value =  "${var.cluster_name}-karpenter-sqs-queue"
+  # }
 
   depends_on = [ aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private , aws_iam_role.karpenter_controller , aws_iam_instance_profile.karpenter , aws_sqs_queue.karpenter ]
 
@@ -203,7 +226,7 @@ resource "helm_release" "karpenter" {
 
 
 resource "kubectl_manifest" "karpenter-provisioner" {
-    depends_on = [ helm_release.karpenter , aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
+    depends_on = [ helm_release.karpenter , aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private]
     yaml_body = <<YAML
 apiVersion: karpenter.sh/v1alpha5
 kind: Provisioner
@@ -222,12 +245,9 @@ spec:
     - key: karpenter.sh/capacity-type
       operator: In
       values: ["spot"]
-    - key: "karpenter.k8s.aws/instance-category"
+    - key: "node.kubernetes.io/instance-type"
       operator: In
-      values: ["t"]
-    - key: "karpenter.k8s.aws/instance-cpu"
-      operator: In
-      values: ["4", "8"]
+      values: ["t3a.micro" , "t3a.medium" , "t3a.large" ]
     - key: "topology.kubernetes.io/zone"
       operator: In
       values: ["us-east-1a", "us-east-1b" , "us-east-1c"]
@@ -237,4 +257,5 @@ spec:
   ttlSecondsAfterEmpty: 30
 YAML
 }
+
 
