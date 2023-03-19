@@ -43,11 +43,11 @@ data "aws_subnet" "private_subnets" {
 
 data "aws_caller_identity" "current" {}
 
-data "aws_iam_role" "NodeGroupRole" {
-  name = "EKSNodeGroupRole_v2"
+# data "aws_iam_role" "NodeGroupRole" {
+#   name = "EKSNodeGroupRole_v2"
 
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private , aws_iam_role.NodeGroupRole  ]
-}
+#   depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private , aws_iam_role.NodeGroupRole  ]
+# }
 
 
 data "aws_iam_role" "alb_ingress" {
