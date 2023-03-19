@@ -520,7 +520,6 @@ resource "kubernetes_service_account" "aws-load-balancer-controller-service-acco
 
 
 resource "kubernetes_secret" "aws-load-balancer-controller" {
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"
@@ -532,7 +531,7 @@ resource "kubernetes_secret" "aws-load-balancer-controller" {
 
   type = "kubernetes.io/service-account-token"
 
-  depends_on = [kubernetes_service_account.aws-load-balancer-controller-service-account]
+  depends_on = [kubernetes_service_account.aws-load-balancer-controller-service-account , aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private]
 }
 
 
