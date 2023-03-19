@@ -48,7 +48,7 @@ data "aws_iam_policy_document" "karpenter" {
     effect    = "Allow"
   }
   statement {
-    resources = [ data.aws_iam_role.NodeGroupRole.arn ]
+    resources = [ aws_iam_role.NodeGroupRole.arn ]
     actions   = ["iam:PassRole"]
     effect    = "Allow"
   }
@@ -77,7 +77,7 @@ resource "aws_iam_role" "karpenter_controller" {
 
 resource "aws_iam_instance_profile" "karpenter" {
   name = "karpenter-instance-profile"
-  role = aws_iam_role.NodeGroupRole.name
+  role = element(aws_iam_role.NodeGroupRole.*.name,0)
 
   depends_on = [ aws_iam_role.NodeGroupRole  ]
 }
