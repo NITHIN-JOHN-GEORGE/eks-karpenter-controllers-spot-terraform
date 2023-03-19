@@ -448,7 +448,7 @@ data "template_file" "alb-ingress-values" {
 
        vpcId: "${data.aws_vpc.vpc.id}"
 
-       clusterName: "${var.eks_cluster_name}"
+       clusterName: "${var.cluster_name}"
 
        ingressClass: alb
 
@@ -472,7 +472,7 @@ data "template_file" "ebs-csi-driver-values" {
     controller:
       region: "${var.region}"
       replicaCount: 1
-      k8sTagClusterId: "${var.eks_cluster_name}" 
+      k8sTagClusterId: "${var.cluster_name}" 
       updateStrategy:
         type: RollingUpdate
         rollingUpdate:
