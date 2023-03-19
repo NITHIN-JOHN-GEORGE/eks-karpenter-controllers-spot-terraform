@@ -46,7 +46,6 @@ provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
   token                  = data.aws_eks_cluster_auth.cluster.token
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private  ]
 }
 
 provider "kubectl" {
@@ -54,7 +53,6 @@ provider "kubectl" {
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
   token                  = data.aws_eks_cluster_auth.cluster.token
   load_config_file       = false
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private  ]
 }
 
 provider "helm" {
@@ -63,7 +61,6 @@ provider "helm" {
      token                  = data.aws_eks_cluster_auth.cluster.token
      cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
   }
-  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private  ]
 }
 
 

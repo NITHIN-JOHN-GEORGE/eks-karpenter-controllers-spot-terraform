@@ -275,7 +275,7 @@ resource "aws_iam_role_policy_attachment" "load-balancer-policy-role" {
 
 ###EBS-CONTROLLER###
 
-data "aws_iam_policy_document" "eks_oidc_assume_role" {
+data "aws_iam_policy_document" "eks_oidc_assume_role_ebs" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
@@ -297,7 +297,7 @@ data "aws_iam_policy_document" "eks_oidc_assume_role" {
 
 resource "aws_iam_role" "ebs-csi" {
   name               = "ebs-csi-role"
-  assume_role_policy = data.aws_iam_policy_document.eks_oidc_assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.eks_oidc_assume_role_ebs.json
 }
 
 # IAM policy  for EBS CSI  controller

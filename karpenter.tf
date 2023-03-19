@@ -151,22 +151,22 @@ resource "aws_cloudwatch_event_rule" "instance_state_change_rule" {
   })
 }
 
-resource "aws_cloudwatch_event_target" "karpenter_interruption_queue_target" {
+resource "aws_cloudwatch_event_target" "scheduled_change_rule" {
   rule      = aws_cloudwatch_event_rule.scheduled_change_rule.name
   arn       = aws_sqs_queue.karpenter.arn
 }
 
-resource "aws_cloudwatch_event_target" "karpenter_interruption_queue_target" {
+resource "aws_cloudwatch_event_target" "spot_interruption_rule" {
   rule      = aws_cloudwatch_event_rule.spot_interruption_rule.name
   arn       = aws_sqs_queue.karpenter.arn
 }
 
-resource "aws_cloudwatch_event_target" "karpenter_interruption_queue_target" {
+resource "aws_cloudwatch_event_target" "rebalance_rule" {
   rule      = aws_cloudwatch_event_rule.rebalance_rule.name
   arn       = aws_sqs_queue.karpenter.arn
 }
 
-resource "aws_cloudwatch_event_target" "karpenter_interruption_queue_target" {
+resource "aws_cloudwatch_event_target" "instance_state_change_rule" {
   rule      = aws_cloudwatch_event_rule.instance_state_change_rule.name
   arn       = aws_sqs_queue.karpenter.arn
 }
