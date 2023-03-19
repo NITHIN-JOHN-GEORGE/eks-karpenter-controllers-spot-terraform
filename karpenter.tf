@@ -222,9 +222,12 @@ spec:
     - key: karpenter.sh/capacity-type
       operator: In
       values: ["spot"]
-    - key: "node.kubernetes.io/instance-type"
+    - key: "karpenter.k8s.aws/instance-category"
       operator: In
-      values: ["t3a.micro" , "t3a.medium" , "t3a.large" ]
+      values: ["t"]
+    - key: "karpenter.k8s.aws/instance-cpu"
+      operator: In
+      values: ["4", "8"]
     - key: "topology.kubernetes.io/zone"
       operator: In
       values: ["us-east-1a", "us-east-1b" , "us-east-1c"]

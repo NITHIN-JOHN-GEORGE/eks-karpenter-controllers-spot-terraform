@@ -193,4 +193,5 @@ resource "aws_eks_addon" "addons" {
   cluster_name      = element(aws_eks_cluster.eks-cluster.*.name,0)
   addon_name        = each.value.name
   resolve_conflicts = "OVERWRITE"
+  depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
 }
