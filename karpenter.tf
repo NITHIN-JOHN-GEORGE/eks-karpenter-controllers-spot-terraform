@@ -39,7 +39,7 @@ data "aws_iam_policy_document" "karpenter" {
     # Make sure Karpenter can only delete nodes that it has provisioned
     condition {
       test     = "StringEquals"
-      values   = [var.eks_cluster_name]
+      values   = [var.cluster_name]
       variable = "ec2:ResourceTag/karpenter.sh/discovery"
     }
   }
@@ -89,7 +89,7 @@ resource "aws_iam_instance_profile" "karpenter" {
 
 resource "aws_sqs_queue" "karpenter" {
   message_retention_seconds = 300
-  name   = "${var.eks_cluster_name}-karpenter-sqs-queue"
+  name   = "${var.cluster_name}-karpenter-sqs-queue"
   depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
 }
 
@@ -182,7 +182,7 @@ settings:
     clusterName: "${data.aws_eks_cluster.cluster.id}"
     clusterEndpoint: "${data.aws_eks_cluster.cluster.endpoint}"
     defaultInstanceProfile: "${aws_iam_instance_profile.karpenter.name}"
-    interruptionQueueName: "${var.eks_cluster_name}-karpenter-sqs-queue"
+    interruptionQueueName: "${var.cluster_name}-karpenter-sqs-queue"
    EOF
 }
 
@@ -213,11 +213,11 @@ metadata:
 spec:
   provider:
     securityGroupSelector:
-      karpenter.sh/discovery: "${var.eks_cluster_name}"
+      karpenter.sh/discovery: "${var.cluster_name}"
     subnetSelector:
-      karpenter.sh/discovery: "${var.eks_cluster_name}"
+      karpenter.sh/discovery: "${var.cluster_name}"
     tags:
-      karpenter.sh/discovery: "${var.eks_cluster_name}"
+      karpenter.sh/discovery: "${var.cluster_name}"
   requirements:
     - key: karpenter.sh/capacity-type
       operator: In
