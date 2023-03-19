@@ -75,14 +75,11 @@ resource "aws_iam_role" "karpenter_controller" {
 ## Karpenter Instance Profile
 
 
-data "aws_iam_role" "NodeGroupRole" {
-  name = "EKSNodeGroupRole_v2"
-}
-
-
 resource "aws_iam_instance_profile" "karpenter" {
   name = "karpenter-instance-profile"
-  role = data.aws_iam_role.NodeGroupRole.name
+  role = aws_iam_role.NodeGroupRole.name
+
+  depends_on = [ aws_iam_role.NodeGroupRole  ]
 }
 
 #### Enable Interruption Handling ####
