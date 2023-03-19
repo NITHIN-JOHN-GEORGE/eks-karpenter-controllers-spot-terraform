@@ -48,7 +48,7 @@ data "aws_iam_policy_document" "karpenter" {
     effect    = "Allow"
   }
   statement {
-    resources = [ aws_iam_role.NodeGroupRole.arn ]
+    resources = [element(aws_iam_role.NodeGroupRole.*.arn,0)]
     actions   = ["iam:PassRole"]
     effect    = "Allow"
   }
