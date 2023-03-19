@@ -74,6 +74,6 @@ data "aws_eks_cluster_auth" "cluster" {
   depends_on = [aws_eks_cluster.eks-cluster , aws_eks_node_group.node-group-private ]
 }
 
-data "aws_iam_openid_connect_provider" "openid" {
-  url = data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer
-}
+# data "aws_iam_openid_connect_provider" "openid" {
+#   url = data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+# }
